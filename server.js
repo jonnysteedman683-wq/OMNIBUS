@@ -1418,6 +1418,79 @@ app.post('/api/v75-frontier-zenith-synthesis', (req, res) => {
   }
 });
 
+app.post('/api/v85-singularity-nexus-synthesis', (req, res) => {
+  const { prompt } = req.body;
+  try {
+    const expML = require('./experimental_ml.js');
+    const orchestrator = new expML.OmniSingularityNexusOrchestratorV85();
+    const result = orchestrator.runSingularityNexusSuite(prompt || 'Master OMNIBUS v85.0 Singularity Nexus ML Synthesis');
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v85/diff-tot-search', (req, res) => {
+  const { prompt } = req.body;
+  try {
+    const expML = require('./experimental_ml.js');
+    const planner = new expML.DiffToTPlannerV85(64, 12, 4);
+    const result = planner.sampleDenoisedTrajectory(prompt || 'Diffusion ToT Verification');
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v85/mod-moe-route', (req, res) => {
+  const { prompt } = req.body;
+  try {
+    const expML = require('./experimental_ml.js');
+    const router = new expML.MoDMoESinkhornRouterV85(16, 4, 0.45);
+    const result = router.routeTokens(prompt || 'Mixture of Depths Routing');
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v85/titans-ttt-store', (req, res) => {
+  const { prompt } = req.body;
+  try {
+    const expML = require('./experimental_ml.js');
+    const titans = new expML.TitansTTTMemoryStoreV85(128, 0.05);
+    const updateRes = titans.updateSurpriseMemory(prompt || 'Titans Surprise Context');
+    const recallRes = titans.recallMemory(prompt || 'Titans Surprise Context');
+    res.json({ success: true, update: updateRes, recall: recallRes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v85/poincare-vsa-bind', (req, res) => {
+  const { conceptA, conceptB } = req.body;
+  try {
+    const expML = require('./experimental_ml.js');
+    const vsa = new expML.QuantumHyperbolicVSABinderV85();
+    const result = vsa.bindHypervectors(conceptA || 'SINGULARITY', conceptB || 'NEXUS');
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v85/liquid-snn-step', (req, res) => {
+  const { steps } = req.body;
+  try {
+    const expML = require('./experimental_ml.js');
+    const liquidSNN = new expML.LiquidSNNODEEngineV85(128, 20.0, 0.01);
+    const result = liquidSNN.stepSpikeDynamics(steps || 10);
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Fallback to serve index.html for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));

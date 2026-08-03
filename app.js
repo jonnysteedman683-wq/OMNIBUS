@@ -96,11 +96,71 @@ document.addEventListener('DOMContentLoaded', () => {
     chatInputField.style.height = 'auto';
     appendUserMessage(promptText);
 
-    const mode = engineModeSelector ? engineModeSelector.value : 'v75_zenith';
-    setOrbState('thinking', 'Executing v75.0 Zenith ML Core...');
+    const mode = engineModeSelector ? engineModeSelector.value : 'v85_nexus';
+    setOrbState('thinking', 'Executing v85.0 Singularity Nexus ML Core...');
 
     try {
-      if (mode === 'v75_zenith') {
+      if (mode === 'v85_nexus') {
+        const response = await fetch('/api/v85-singularity-nexus-synthesis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: promptText })
+        });
+        const data = await response.json();
+        setOrbState('responding', 'v85.0 Singularity Nexus Synthesis Complete');
+        renderNexusV85Result(data.result);
+      }
+      else if (mode === 'v85_diff_tot') {
+        const response = await fetch('/api/v85/diff-tot-search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: promptText })
+        });
+        const data = await response.json();
+        setOrbState('responding', 'v85.0 Diffusion ToT Search Complete');
+        renderDiffToTResult(data.result);
+      }
+      else if (mode === 'v85_mod_moe') {
+        const response = await fetch('/api/v85/mod-moe-route', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: promptText })
+        });
+        const data = await response.json();
+        setOrbState('responding', 'v85.0 MoD & MoE Routing Complete');
+        renderModMoeV85Result(data.result);
+      }
+      else if (mode === 'v85_titans_ttt') {
+        const response = await fetch('/api/v85/titans-ttt-store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: promptText })
+        });
+        const data = await response.json();
+        setOrbState('responding', 'v85.0 Titans TTT Memory Update Complete');
+        renderTitansTTTResult(data);
+      }
+      else if (mode === 'v85_poincare_vsa') {
+        const response = await fetch('/api/v85/poincare-vsa-bind', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conceptA: 'SINGULARITY_NEXUS', conceptB: promptText })
+        });
+        const data = await response.json();
+        setOrbState('responding', 'v85.0 Poincaré VSA Binding Complete');
+        renderPoincareVSAResult(data.result);
+      }
+      else if (mode === 'v85_liquid_snn') {
+        const response = await fetch('/api/v85/liquid-snn-step', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ steps: 10 })
+        });
+        const data = await response.json();
+        setOrbState('responding', 'v85.0 Liquid SNN ODE Step Complete');
+        renderLiquidSNNResult(data.result);
+      }
+      else if (mode === 'v75_zenith') {
         const response = await fetch('/api/v75-frontier-zenith-synthesis', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -246,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       setTimeout(() => {
-        setOrbState('idle', 'OMNIBUS Neural Interface · v75.0 Zenith Ready');
+        setOrbState('idle', 'OMNIBUS Neural Interface · v85.0 Singularity Nexus Ready');
       }, 1500);
 
     } catch (err) {
@@ -555,5 +615,116 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
     appendAssistantMessage(html, '🧠 Neuromorphic Liquid SNN Result');
+  }
+
+  function renderNexusV85Result(res) {
+    if (!res) return;
+    let html = `
+      <div style="font-size: 0.9rem; line-height: 1.6;">
+        <div style="margin-bottom: 8px; font-weight: bold; color: #00f0ff;">
+          🌌 ${res.version}
+        </div>
+        <div style="display: flex; gap: 12px; margin-bottom: 10px; font-size: 0.82rem;">
+          <span style="background: rgba(0,240,255,0.1); border: 1px solid #00f0ff; padding: 2px 8px; border-radius: 4px;">Confidence: ${res.nexusSynthesisConfidence}</span>
+          <span style="background: rgba(0,255,136,0.1); border: 1px solid #00ff88; padding: 2px 8px; border-radius: 4px;">Swarm Agents: ${res.activeSwarmAgents}</span>
+          <span style="background: rgba(255,0,234,0.1); border: 1px solid #ff00ea; padding: 2px 8px; border-radius: 4px;">Status: ${res.status}</span>
+        </div>
+
+        <div style="margin-bottom: 8px; padding: 8px 12px; background: rgba(0,240,255,0.05); border-left: 3px solid #00f0ff; border-radius: 4px;">
+          <div style="color: #00f0ff; font-weight: bold;">🎯 Self-Reflective Latent Diffusion ToT & PRM</div>
+          <div>Branches: ${res.diffToTTrajectory?.exploredBranches} | Best PRM Score: ${res.diffToTTrajectory?.bestBranch?.avgPRMScore} | Trajectory Norm: ${res.diffToTTrajectory?.bestBranch?.finalLatentNorm}</div>
+        </div>
+
+        <div style="margin-bottom: 8px; padding: 8px 12px; background: rgba(0,255,136,0.05); border-left: 3px solid #00ff88; border-radius: 4px;">
+          <div style="color: #00ff88; font-weight: bold;">🔀 Mixture-of-Depths & MoE Sub-Bit Sinkhorn Router</div>
+          <div>MoD Skip Ratio: ${(res.modMoESinkhornRouting?.modSkipRatio * 100).toFixed(1)}% | Active Tokens: ${res.modMoESinkhornRouting?.totalTokens}</div>
+        </div>
+
+        <div style="margin-bottom: 8px; padding: 8px 12px; background: rgba(255,0,234,0.05); border-left: 3px solid #ff00ea; border-radius: 4px;">
+          <div style="color: #ff00ea; font-weight: bold;">🧠 Titans Infinite-Context TTT Surprise Memory</div>
+          <div>Surprise Delta: ${res.titansTTTMemoryUpdate?.memorySurpriseDelta} | Cosine Similarity: ${res.titansTTTMemoryRecall?.cosineSimilarity} | Memory Norm: ${res.titansTTTMemoryRecall?.memoryWeightNorm}</div>
+        </div>
+
+        <div style="margin-bottom: 8px; padding: 8px 12px; background: rgba(255,170,0,0.05); border-left: 3px solid #ffaa00; border-radius: 4px;">
+          <div style="color: #ffaa00; font-weight: bold;">⚛️ 68B+ Poincaré Hyperbolic VSA Binding</div>
+          <div>Poincaré Distance: ${res.quantumPoincareVSA?.poincareDistance} | Phase Shift: ${res.quantumPoincareVSA?.boundPhaseShiftRad} rad | Hash: ${res.quantumPoincareVSA?.boundRepresentationHash}</div>
+        </div>
+
+        <div style="padding: 8px 12px; background: rgba(187,0,255,0.05); border-left: 3px solid #bb00ff; border-radius: 4px;">
+          <div style="color: #bb00ff; font-weight: bold;">🐝 Swarm Debate Consensus & RLVR GRPO</div>
+          <div>Consensus: ${(res.swarmDebateRLVR?.finalConsensusConfidence * 100).toFixed(1)}% | Average Reward: ${res.swarmDebateRLVR?.averageRLVRReward}</div>
+        </div>
+      </div>
+    `;
+    appendAssistantMessage(html, '🌟 OMNIBUS v85.0 Singularity Nexus Result');
+  }
+
+  function renderDiffToTResult(res) {
+    if (!res) return;
+    let html = `
+      <div style="font-size: 0.9rem;">
+        <div><b>Engine:</b> ${res.engine}</div>
+        <div><b>Explored Branches:</b> ${res.exploredBranches} | <b>Latent Dimensions:</b> ${res.latentDimensions}</div>
+        <div><b>Best Branch ID:</b> #${res.bestBranch?.branchId}</div>
+        <div><b>Best Branch PRM Score:</b> <span style="color: #00ff88; font-weight: bold;">${res.bestBranch?.avgPRMScore}</span></div>
+        <div><b>Tree Search Entropy:</b> ${res.treeSearchEntropy}</div>
+      </div>
+    `;
+    appendAssistantMessage(html, '🎯 Diffusion ToT Search Result');
+  }
+
+  function renderModMoeV85Result(res) {
+    if (!res) return;
+    let html = `
+      <div style="font-size: 0.9rem;">
+        <div><b>Engine:</b> ${res.engine}</div>
+        <div><b>Total Tokens Evaluated:</b> ${res.totalTokens}</div>
+        <div><b>MoD Layer Skip Ratio:</b> <span style="color: #00f0ff; font-weight: bold;">${(res.modSkipRatio * 100).toFixed(1)}%</span></div>
+      </div>
+    `;
+    appendAssistantMessage(html, '🔀 MoD & MoE Sinkhorn Routing Result');
+  }
+
+  function renderTitansTTTResult(data) {
+    if (!data) return;
+    let u = data.update;
+    let r = data.recall;
+    let html = `
+      <div style="font-size: 0.9rem;">
+        <div><b>Engine:</b> ${u?.engine}</div>
+        <div><b>Surprise Gradient Magnitude:</b> ${u?.surpriseGradientMagnitude}</div>
+        <div><b>TTT Memory Loss:</b> ${u?.testTimeTrainingLoss}</div>
+        <div><b>Memory Weight Norm:</b> <span style="color: #ff00ea; font-weight: bold;">${u?.updatedMemoryNorm}</span></div>
+        <div><b>Recall Cosine Similarity:</b> <span style="color: #00ff88; font-weight: bold;">${r?.cosineSimilarity}</span></div>
+      </div>
+    `;
+    appendAssistantMessage(html, '🧠 Titans Infinite TTT Memory Result');
+  }
+
+  function renderPoincareVSAResult(res) {
+    if (!res) return;
+    let html = `
+      <div style="font-size: 0.9rem;">
+        <div><b>Engine:</b> ${res.engine}</div>
+        <div><b>Bound Concepts:</b> ${res.concepts?.join(' ⊗ ')}</div>
+        <div><b>Poincaré Ball Distance:</b> <span style="color: #00f0ff; font-weight: bold;">${res.poincareDistance}</span></div>
+        <div><b>Phase Shift Angle:</b> ${res.boundPhaseShiftRad} rad</div>
+        <div><b>Representation Hash:</b> ${res.boundRepresentationHash}</div>
+      </div>
+    `;
+    appendAssistantMessage(html, '⚛️ Poincaré Hyperbolic VSA Result');
+  }
+
+  function renderLiquidSNNResult(res) {
+    if (!res) return;
+    let html = `
+      <div style="font-size: 0.9rem;">
+        <div><b>Engine:</b> ${res.engine}</div>
+        <div><b>Total Spike Events:</b> ${res.totalSpikeEvents}</div>
+        <div><b>Firing Rate:</b> ${res.firingRateHz} Hz</div>
+        <div><b>STDP Synaptic Plasticity Delta:</b> <span style="color: #00ff88; font-weight: bold;">${res.stdpSynapticPlasticityDelta}</span></div>
+      </div>
+    `;
+    appendAssistantMessage(html, '🧠 Continuous Liquid SNN ODE Result');
   }
 });
