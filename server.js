@@ -1394,6 +1394,30 @@ app.post('/api/v65-omni-cosmos-synthesis', (req, res) => {
   }
 });
 
+app.post('/api/v70-singularity-apex-synthesis', (req, res) => {
+  const { prompt } = req.body;
+  try {
+    const expML = require('./experimental_ml.js');
+    const orchestrator = new expML.OmniSingularityApexSupremeOrchestratorV70();
+    const result = orchestrator.runApexSingularitySuite(prompt || 'Master OMNIBUS v70.0 Singularity Apex ML Synthesis');
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/v75-frontier-zenith-synthesis', (req, res) => {
+  const { prompt } = req.body;
+  try {
+    const expML = require('./experimental_ml.js');
+    const orchestrator = new expML.OmniSingularityFrontierZenithOrchestratorV75();
+    const result = orchestrator.runFrontierZenithSuite(prompt || 'Master OMNIBUS v75.0 Frontier Zenith ML Synthesis');
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Fallback to serve index.html for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -1402,4 +1426,5 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`OMNIBUS Backend running at http://localhost:${PORT}`);
 });
+
 

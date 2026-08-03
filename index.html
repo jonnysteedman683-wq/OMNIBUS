@@ -401,6 +401,17 @@
 
       <div style="display: flex; align-items: center; gap: 12px;">
         <select id="engineModeSelector" class="engine-selector-dropdown">
+          <option value="v75_zenith">🌟 v75.0 Singularity Zenith Supreme Suite</option>
+          <option value="v75_diffworld">🌌 v75.0 Diffusion World Trajectory Model</option>
+          <option value="v75_selfevolve">🧬 v75.0 Self-Evolving DPO Alignment</option>
+          <option value="v75_qtensor">⚛️ v75.0 Quantum MPS Tensor Attention</option>
+          <option value="v75_sparse_moe">🔀 v75.0 Sparse MoE Gumbel Router</option>
+          <option value="v75_neuromorphic">🧠 v75.0 Neuromorphic Liquid SNN</option>
+          <option value="v70_apex">🚀 v70.0 Singularity Apex Supreme Suite</option>
+          <option value="v70_ttc">🧠 v70.0 Dynamic Test-Time Compute (TTC)</option>
+          <option value="v70_rlvr">⚡ v70.0 RLVR Verifiable Rewards</option>
+          <option value="v70_swarm">🐝 v70.0 Multi-Agent Swarm Debate (MAD-C)</option>
+          <option value="v70_speculative">🔮 v70.0 Self-Speculative Decoding</option>
           <option value="prm_mcts">🌲 Real LLM PRM-MCTS Tree Search</option>
           <option value="grpo_v3">🧮 Real LLM GRPO-v3 Advantage</option>
           <option value="titans">🧠 Titans Persistent Vector Memory</option>
@@ -419,7 +430,7 @@
         <canvas id="glowingOrbCanvas"></canvas>
       </div>
       <div class="orb-status-text">
-        <i class="fas fa-shield-alt" style="color: #00f0ff;"></i> <span id="orbStateLabel">OMNIBUS Neural Interface · System Ready</span>
+        <i class="fas fa-shield-alt" style="color: #00f0ff;"></i> <span id="orbStateLabel">OMNIBUS Neural Interface · v75.0 Zenith Ready</span>
       </div>
     </section>
 
@@ -431,26 +442,32 @@
         <div class="message-card assistant">
           <div class="avatar assistant"><i class="fas fa-robot"></i></div>
           <div class="message-bubble">
-            <div style="font-weight: 800; color: #00f0ff; margin-bottom: 4px;">OMNIBUS Core Assistant</div>
-            Welcome! I am OMNIBUS, backed by **Real LLM PRM-MCTS reasoning**, **Titans persistent vector memory**, and **Python PyTorch tensor math**.
+            <div style="font-weight: 800; color: #00f0ff; margin-bottom: 4px;">OMNIBUS v75.0 Singularity Zenith Assistant</div>
+            Welcome! I am OMNIBUS v75.0, empowered by **Diffusion World Trajectory Rollout**, **Self-Evolving Test-Time DPO Alignment**, **Quantum MPS Tensor Attention**, **Sparse MoE Gumbel Softmax Routing**, **Neuromorphic Liquid SNNs**, **Dynamic Test-Time Compute (TTC)**, **RLVR Verifiable Rewards**, and **Python PyTorch Tensor Math**.
             <br><br>
-            Ask me to solve complex problems, store/recall facts, or run multi-candidate policy optimizations:
+            Select a frontier ML engine or click a quick synthesis pill:
             
             <div class="suggestions-container">
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Execute v75.0 Singularity Zenith Supreme ML synthesis on distributed system architecture')">
+                <i class="fas fa-star"></i> v75.0 Singularity Zenith Suite
+              </div>
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Run Diffusion World Model denoising trajectory rollout for autonomous navigation')">
+                <i class="fas fa-compass"></i> Diffusion World Model
+              </div>
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Run Self-Evolving Direct Preference Optimization (DPO) alignment on code generation')">
+                <i class="fas fa-dna"></i> Self-Evolving DPO Alignment
+              </div>
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Compress 1024-sequence attention with Quantum MPS Tensor Network')">
+                <i class="fas fa-atom"></i> Quantum MPS Tensor Net
+              </div>
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Route 8-expert Mixture-of-Experts with Gumbel-Softmax noise & Sinkhorn loss')">
+                <i class="fas fa-random"></i> Sparse MoE Gumbel Router
+              </div>
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Simulate Neuromorphic Liquid SNN membrane dynamics & STDP synaptic weight adaptation')">
+                <i class="fas fa-brain"></i> Neuromorphic Liquid SNN
+              </div>
               <div class="suggestion-pill" onclick="sendQuickPrompt('Execute Real PRM-MCTS tree search to optimize database indexing')">
                 <i class="fas fa-tree"></i> PRM-MCTS Tree Search
-              </div>
-              <div class="suggestion-pill" onclick="sendQuickPrompt('Store fact: OMNIBUS uses Titans surprise-gated vector memory')">
-                <i class="fas fa-brain"></i> Store Vector Memory
-              </div>
-              <div class="suggestion-pill" onclick="sendQuickPrompt('Recall knowledge about OMNIBUS architecture')">
-                <i class="fas fa-search"></i> Recall Vector Memory
-              </div>
-              <div class="suggestion-pill" onclick="sendQuickPrompt('Run GRPO-v3 relative advantage optimization on cache refactoring')">
-                <i class="fas fa-calculator"></i> GRPO-v3 Advantage
-              </div>
-              <div class="suggestion-pill" onclick="sendQuickPrompt('Run Python PyTorch BitNet 1.58b ternary quantization test')">
-                <i class="fab fa-python"></i> Python Tensor Core
               </div>
             </div>
           </div>
