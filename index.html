@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OMNIBUS - Single Chat Interface</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Streamlined Single Chat Interface & Glowing Orb Styles */
+    body {
+      background: #060810;
+      color: #f0f2f5;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cosmic-app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 1300px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 15px 20px;
+      box-sizing: border-box;
+    }
+
+    /* Header */
+    .cosmic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: rgba(12, 16, 30, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+
+    .cosmic-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cosmic-logo i {
+      font-size: 1.8rem;
+      color: #00f0ff;
+      filter: drop-shadow(0 0 10px #00f0ff);
+    }
+
+    .cosmic-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #ffffff, #00f0ff, #ff00ea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(0, 255, 136, 0.12);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      color: #00ff88;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 20px;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background: #00ff88;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #00ff88;
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    .engine-selector-dropdown {
+      background: rgba(8, 12, 24, 0.85);
+      color: #00f0ff;
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Central Floating Rotating Glowing Orb Section */
+    .hero-orb-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px 0 5px 0;
+      position: relative;
+    }
+
+    .orb-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: orbFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    #glowingOrbCanvas {
+      width: 180px;
+      height: 180px;
+      display: block;
+      filter: drop-shadow(0 0 25px rgba(0, 240, 255, 0.4));
+    }
+
+    .orb-status-text {
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .orb-status-text span {
+      color: #00f0ff;
+      font-weight: 800;
+    }
+
+    /* Chat Messages Main Area */
+    .chat-main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin-top: 10px;
+      background: rgba(8, 12, 24, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .chat-messages-stream {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message-card {
+      display: flex;
+      gap: 14px;
+      max-width: 88%;
+      animation: messageSlide 0.3s ease-out forwards;
+    }
+
+    @keyframes messageSlide {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-card.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-card.assistant {
+      align-self: flex-start;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .avatar.user {
+      background: linear-gradient(135deg, #7000ff, #ff00ea);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(255, 0, 234, 0.4);
+    }
+
+    .avatar.assistant {
+      background: linear-gradient(135deg, #00f0ff, #0070ff);
+      color: #060810;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+
+    .message-bubble {
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .message-card.user .message-bubble {
+      background: linear-gradient(135deg, rgba(112, 0, 255, 0.35), rgba(255, 0, 234, 0.25));
+      border: 1px solid rgba(255, 0, 234, 0.35);
+      color: #ffffff;
+      border-top-right-radius: 4px;
+    }
+
+    .message-card.assistant .message-bubble {
+      background: rgba(14, 20, 36, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      color: #e2e8f0;
+      border-top-left-radius: 4px;
+    }
+
+    .code-block-wrapper {
+      background: #04060c;
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 8px;
+      margin: 10px 0;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .code-block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: rgba(0, 240, 255, 0.08);
+      font-size: 0.75rem;
+      color: #00f0ff;
+    }
+
+    .code-block-content {
+      padding: 12px;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      color: #00ff88;
+      white-space: pre-wrap;
+    }
+
+    /* Quick Suggestions Pills */
+    .suggestions-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .suggestion-pill {
+      padding: 8px 14px;
+      background: rgba(0, 240, 255, 0.06);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      color: #00f0ff;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .suggestion-pill:hover {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: #00f0ff;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Chat Input Dock */
+    .chat-input-dock {
+      padding: 14px 20px;
+      background: rgba(6, 9, 20, 0.9);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .input-textarea-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    #chatInputField {
+      width: 100%;
+      background: rgba(14, 20, 36, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      resize: none;
+      box-sizing: border-box;
+      max-height: 120px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #chatInputField:focus {
+      border-color: #00f0ff;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+    }
+
+    .send-btn {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #00f0ff, #7000ff);
+      border: none;
+      border-radius: 12px;
+      color: #060810;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+    }
+
+    .action-icon-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .action-icon-btn:hover {
+      color: #00f0ff;
+      border-color: #00f0ff;
+      background: rgba(0, 240, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="animated-bg"></div>
+
+  <div class="cosmic-app-container">
+    
+    <!-- Top Minimalist Header -->
+    <header class="cosmic-header">
+      <div class="cosmic-logo">
+        <i class="fas fa-microchip"></i>
+        <h1 class="cosmic-title">OMNIBUS AI</h1>
+        <div class="status-badge">
+          <div class="badge-dot"></div>
+          REAL LLM & TITANS MEMORY ACTIVE
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <select id="engineModeSelector" class="engine-selector-dropdown">
+          <option value="prm_mcts">🌲 Real LLM PRM-MCTS Tree Search</option>
+          <option value="grpo_v3">🧮 Real LLM GRPO-v3 Advantage</option>
+          <option value="titans">🧠 Titans Persistent Vector Memory</option>
+          <option value="python_core">🐍 Python PyTorch Tensor Core</option>
+        </select>
+
+        <button id="clearChatBtn" class="action-icon-btn" title="Clear Chat History">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Central Levitating Rotating Glowing Orb -->
+    <section class="hero-orb-section">
+      <div class="orb-wrapper">
+        <canvas id="glowingOrbCanvas"></canvas>
+      </div>
+      <div class="orb-status-text">
+        <i class="fas fa-shield-alt" style="color: #00f0ff;"></i> <span id="orbStateLabel">OMNIBUS Neural Interface · System Ready</span>
+      </div>
+    </section>
+
+    <!-- Main Chat Interface Area -->
+    <main class="chat-main-area">
+      <div class="chat-messages-stream" id="chatMessagesStream">
+        
+        <!-- Welcome Message from Assistant -->
+        <div class="message-card assistant">
+          <div class="avatar assistant"><i class="fas fa-robot"></i></div>
+          <div class="message-bubble">
+            <div style="font-weight: 800; color: #00f0ff; margin-bottom: 4px;">OMNIBUS Core Assistant</div>
+            Welcome! I am OMNIBUS, backed by **Real LLM PRM-MCTS reasoning**, **Titans persistent vector memory**, and **Python PyTorch tensor math**.
+            <br><br>
+            Ask me to solve complex problems, store/recall facts, or run multi-candidate policy optimizations:
+            
+            <div class="suggestions-container">
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Execute Real PRM-MCTS tree search to optimize database indexing')">
+                <i class="fas fa-tree"></i> PRM-MCTS Tree Search
+              </div>
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Store fact: OMNIBUS uses Titans surprise-gated vector memory')">
+                <i class="fas fa-brain"></i> Store Vector Memory
+              </div>
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Recall knowledge about OMNIBUS architecture')">
+                <i class="fas fa-search"></i> Recall Vector Memory
+              </div>
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Run GRPO-v3 relative advantage optimization on cache refactoring')">
+                <i class="fas fa-calculator"></i> GRPO-v3 Advantage
+              </div>
+              <div class="suggestion-pill" onclick="sendQuickPrompt('Run Python PyTorch BitNet 1.58b ternary quantization test')">
+                <i class="fab fa-python"></i> Python Tensor Core
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Chat Dock -->
+      <footer class="chat-input-dock">
+        <div class="input-textarea-wrapper">
+          <textarea id="chatInputField" rows="1" placeholder="Type a message or instruction for OMNIBUS..."></textarea>
+        </div>
+        <button id="chatSendBtn" class="send-btn" title="Send Message">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </footer>
+    </main>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="orb_renderer.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Initialize Floating Rotating Glowing Orb
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.GlowingOrbVisualizer) {
+        window.orbVisualizer = new window.GlowingOrbVisualizer('glowingOrbCanvas');
+      }
+    });
+
+    function sendQuickPrompt(text) {
+      const input = document.getElementById('chatInputField');
+      if (input) {
+        input.value = text;
+        document.getElementById('chatSendBtn').click();
+      }
+    }
+  </script>
+</body>
+</html>
