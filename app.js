@@ -22,9 +22,50 @@ async function initHiveSwarmMind() {
         window.orbVisualizer.setState('idle');
       }
     }
+    
+    // Start status polling
+    updateHiveSwarmStatus();
+    setInterval(updateHiveSwarmStatus, 5000);
   } catch (err) {
     console.warn('[app.js] Hive Swarm Mind connection failed:', err.message);
     window.omnibusSwarmConnected = false;
+    updateHiveSwarmStatus();
+  }
+}
+
+async function updateHiveSwarmStatus() {
+  const statusEl = document.getElementById('hiveSwarmStatus');
+  const textEl = document.getElementById('hiveSwarmStatusText');
+  if (!statusEl || !textEl) return;
+
+  try {
+    const res = await fetch('/api/neurocore/status');
+    const data = await res.json();
+    if (data.success && data.connected) {
+      statusEl.style.display = 'inline-flex';
+      textEl.textContent = `Hive Swarm Mind: ${data.lastProvider || 'ready'} · ${data.peers?.length || 0} peers`;
+      statusEl.style.background = 'rgba(0, 255, 136, 0.12)';
+      statusEl.style.borderColor = 'rgba(0, 255, 136, 0.3)';
+      statusEl.style.color = '#00ff88';
+    } else if (data.neurocoreAvailable) {
+      statusEl.style.display = 'inline-flex';
+      textEl.textContent = 'Hive Swarm Mind: available but disconnected';
+      statusEl.style.background = 'rgba(255, 187, 0, 0.12)';
+      statusEl.style.borderColor = 'rgba(255, 187, 0, 0.3)';
+      statusEl.style.color = '#ffbb00';
+    } else {
+      statusEl.style.display = 'inline-flex';
+      textEl.textContent = 'Hive Swarm Mind: unavailable';
+      statusEl.style.background = 'rgba(255, 60, 60, 0.12)';
+      statusEl.style.borderColor = 'rgba(255, 60, 60, 0.3)';
+      statusEl.style.color = '#ff3c3c';
+    }
+  } catch (err) {
+    statusEl.style.display = 'inline-flex';
+    textEl.textContent = 'Hive Swarm Mind: error';
+    statusEl.style.background = 'rgba(255, 60, 60, 0.12)';
+    statusEl.style.borderColor = 'rgba(255, 60, 60, 0.3)';
+    statusEl.style.color = '#ff3c3c';
   }
 }
 
