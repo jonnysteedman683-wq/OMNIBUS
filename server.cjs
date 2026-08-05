@@ -3444,6 +3444,7 @@ app.get('/api/neurocore/learning', async (req, res) => {
 
 app.get('/api/neurocore/tools', async (req, res) => {
   try {
+    await neurocoreBridge.loadNeurocoreModules();
     const functionCallAdapter = typeof neurocoreBridge.getFunctionCallAdapter === 'function' ? neurocoreBridge.getFunctionCallAdapter() : null;
     if (!functionCallAdapter) {
       return res.json({ success: true, connected: false, reason: 'function_call_adapter_unavailable', tools: [] });
@@ -3461,6 +3462,7 @@ app.get('/api/neurocore/tools', async (req, res) => {
 
 app.post('/api/neurocore/tools/call', async (req, res) => {
   try {
+    await neurocoreBridge.loadNeurocoreModules();
     const functionCallAdapter = typeof neurocoreBridge.getFunctionCallAdapter === 'function' ? neurocoreBridge.getFunctionCallAdapter() : null;
     if (!functionCallAdapter) {
       return res.status(503).json({ error: 'Function-call adapter not available.' });
