@@ -3442,6 +3442,47 @@ app.get('/api/neurocore/learning', async (req, res) => {
   }
 });
 
+app.get('/api/neurocore/tools', async (req, res) => {
+  try {
+    const functionCallAdapter = typeof neurocoreBridge.getFunctionCallAdapter === 'function' ? neurocoreBridge.getFunctionCallAdapter() : null;
+    if (!functionCallAdapter) {
+      return res.json({ success: true, connected: false, reason: 'function_call_adapter_unavailable', tools: [] });
+    }
+    const tools = functionCallAdapter.listTools();
+    res.json({
+      success: true,
+      connected: !!(swarmAdapter && systemState.neurocoreConnected),
+      tools
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/neurocore/tools/call', async (req, res) => {
+  try {
+    const functionCallAdapter = typeof neurocoreBridge.getFunctionCallAdapter === 'function' ? neurocoreBridge.getFunctionCallAdapter() : null;
+    if (!functionCallAdapter) {
+      return res.status(503).json({ error: 'Function-call adapter not available.' });
+    }
+    const { tool, arguments: args } = req.body || {};
+    if (!tool || typeof tool !== 'string') {
+      return res.status(400).json({ error: 'Missing tool name' });
+    }
+    const result = await functionCallAdapter.execute({
+      id: `tool-${Date.now()}`,
+      tool,
+      arguments: typeof args === 'object' ? args : {},
+      source: 'api',
+      confidence: 1,
+      requiresConfirmation: false
+    });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/neurocore/debate', async (req, res) => {
   if (!swarmAdapter) {
     return res.status(503).json({ error: 'Swarm adapter not connected.' });
