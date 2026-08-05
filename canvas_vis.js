@@ -6552,6 +6552,56 @@ class OmniSingularityTranscendentV50Visualizer {
     }
   }
 
+  drawV10MSingularityApexCanvas() {
+    const ctx = this.attnCtx || (this.ctxs && this.ctxs.attention);
+    const canvas = this.attnCanvas || (this.canvases && this.canvases.attention);
+    if (!ctx || !canvas) return;
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    // 1. Poincaré Disk Geodesic Rays
+    const cx = w * 0.3;
+    const cy = h * 0.5;
+    const radius = Math.min(w, h) * 0.38;
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2 + this.time * 0.2;
+      const ex = cx + Math.cos(angle) * radius;
+      const ey = cy + Math.sin(angle) * radius;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.quadraticCurveTo(cx + Math.sin(angle) * radius * 0.5, cy + Math.cos(angle) * radius * 0.5, ex, ey);
+      ctx.strokeStyle = `hsla(${(i * 30 + this.time * 50) % 360}, 100%, 65%, 0.7)`;
+      ctx.stroke();
+    }
+
+    // 2. Continuous Flow Matching Streamlines
+    const fxStart = w * 0.6;
+    for (let yStep = 40; yStep < h - 40; yStep += 25) {
+      ctx.beginPath();
+      ctx.moveTo(fxStart, yStep);
+      for (let xStep = fxStart; xStep < w - 20; xStep += 15) {
+        const flowY = yStep + Math.sin(xStep * 0.03 + this.time * 2) * 15;
+        ctx.lineTo(xStep, flowY);
+      }
+      ctx.strokeStyle = 'rgba(255, 0, 234, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // Overlay Header Title
+    ctx.fillStyle = '#00f0ff';
+    ctx.font = '700 13px Inter';
+    ctx.fillText('v10M SINGULARITY APEX HYPER-TENSOR VISUALIZER (QSNO / PL-HVSA / CFM-DoT / TDA)', 15, 25);
+  }
+
   animate() {
     if (!this.ctx) return;
     this.time += 0.016;

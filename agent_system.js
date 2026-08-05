@@ -825,8 +825,63 @@ module.exports = { ArchitectureSpec, executeTaskPipeline };`
     }
   }
 
-  // ─── Direct Agent Conversation ─────────────────────────────────────
+  // ─── Hive Swarm Mind — Unified Dispatch via Neurocore ─────────────────
+  async dispatch(task) {
+    const config = window.apiConfig || { provider: 'hermes', model: 'hermes3' };
+    
+    this.logEvent(`🐝 Dispatching task through Hive Swarm Mind...`, 'info');
+    this.broadcast();
+    
+    try {
+      const response = await fetch('/api/neurocore/intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          intent: task.description || task,
+          source: config.provider,
+          confidence: task.confidence || 0.5,
+          features: task.features || {},
+          requiresConfirmation: task.requiresConfirmation || false
+        })
+      });
+      
+      if (!response.ok) throw new Error('Neurocore intent endpoint failed');
+      const data = await response.json();
+      
+      this.logEvent(`🐝 Hive Swarm Mind dispatched intent ${data.intentId || 'unknown'}`, 'info');
+      return {
+        response: data.results?.[0]?.response || data.response || 'No response',
+        intentId: data.intentId,
+        consensus: data.consensus,
+        provider: data.provider || 'hermes',
+        results: data.results
+      };
+    } catch (neuroErr) {
+      console.warn('[AgentSystem.dispatch] Neurocore routing failed, falling back to direct provider:', neuroErr.message);
+      
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: config.provider,
+          model: config.model,
+          agentId: 'orchestrator',
+          agentRole: 'Orchestrator — Project Governance & Task Decomposition',
+          question: task.description || task
+        })
+      });
+      
+      const fallbackData = await res.json();
+      this.logEvent('Falling back to direct provider dispatch', 'warn');
+      return {
+        response: fallbackData.response,
+        provider: config.provider,
+        fallback: true
+      };
+    }
+  }
 
+  // ─── Direct Agent Conversation ─────────────────────────────────────
   async askAgent(agentId, question) {
     const agent = this.agents.find(a => a.id === agentId);
     if (!agent) return 'Agent not found.';

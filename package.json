@@ -2,10 +2,12 @@
   "name": "omnibus-backend",
   "version": "7.0.0",
   "description": "Node.js backend for OMNIBUS Frontier Supreme Edition",
-  "main": "server.js",
+  "main": "server.cjs",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.cjs",
+    "dev": "node server.cjs",
+    "test": "npx tsx --test tests/*.test.ts",
+    "test:neurocore": "npx tsx --test tests/neurocore_adapter.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.0",
@@ -15,5 +17,8 @@
     "express": "^4.21.2",
     "ollama": "^0.5.12",
     "openai": "^4.82.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.5"
   }
 }

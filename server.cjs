@@ -11,7 +11,7 @@ const ollamaModule = require('ollama');
 const ollamaClient = ollamaModule.default || ollamaModule;
 
 // Hive Swarm Mind — Neurocore ESM bridge
-const neurocoreBridge = require('../neurocore/neurocore-bridge.cjs');
+const neurocoreBridge = require('C:/Users/jonny/OneDrive/Documents/AEGIS/neurocore/neurocore-bridge.cjs');
 let swarmAdapter = null;
 
 // Health check state
@@ -3270,12 +3270,15 @@ app.get('/api/neurocore/health', async (req, res) => {
       });
     }
     
-    const health = await swarmAdapter.getHealthMetrics();
+    const caps = await swarmAdapter.capabilities();
     systemState.lastHealthCheck = Date.now();
     res.json({ 
       success: true, 
       status: 'healthy',
-      health 
+      lastHealthCheck: systemState.lastHealthCheck,
+      neurocoreConnected: systemState.neurocoreConnected,
+      hermesAvailable: systemState.hermesAvailable,
+      capabilities: caps 
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
