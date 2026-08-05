@@ -3303,6 +3303,23 @@ app.get('/api/neurocore/status', async (req, res) => {
   }
 });
 
+app.get('/api/neurocore/queue', async (req, res) => {
+  try {
+    const connected = !!(swarmAdapter && systemState.neurocoreConnected);
+    res.json({
+      success: true,
+      connected,
+      queueSize: systemState.queueSize || 0,
+      lastProvider: systemState.lastProvider || null,
+      lastIntent: systemState.lastIntent || null,
+      lastActionResult: systemState.lastActionResult || null,
+      recent: (systemState.recentIntents || []).slice(-20)
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/neurocore/debate', async (req, res) => {
   if (!swarmAdapter) {
     return res.status(503).json({ error: 'Swarm adapter not connected.' });

@@ -60,6 +60,19 @@ async function updateHiveSwarmStatus() {
       statusEl.style.borderColor = 'rgba(255, 60, 60, 0.3)';
       statusEl.style.color = '#ff3c3c';
     }
+
+    // Update queue widget
+    const queueEl = document.getElementById('hiveQueueWidget');
+    const queueTextEl = document.getElementById('hiveQueueText');
+    if (queueEl && queueTextEl) {
+      const queueSize = typeof data.queueSize === 'number' ? data.queueSize : null;
+      if (queueSize !== null && data.success && data.connected) {
+        queueEl.style.display = 'inline-flex';
+        queueTextEl.textContent = `Queue: ${queueSize}`;
+      } else {
+        queueEl.style.display = 'none';
+      }
+    }
   } catch (err) {
     statusEl.style.display = 'inline-flex';
     textEl.textContent = 'Hive Swarm Mind: error';
