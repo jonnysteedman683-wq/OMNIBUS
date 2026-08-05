@@ -35,6 +35,8 @@ async function initHiveSwarmMind() {
     // Start status polling
     updateHiveSwarmStatus();
     setInterval(updateHiveSwarmStatus, 5000);
+    updateHiveMemoryLearningWidget();
+    setInterval(updateHiveMemoryLearningWidget, 7000);
   } catch (err) {
     console.warn('[app.js] Hive Swarm Mind connection failed:', err.message);
     window.omnibusSwarmConnected = false;
@@ -88,6 +90,56 @@ async function updateHiveSwarmStatus() {
     statusEl.style.background = 'rgba(255, 60, 60, 0.12)';
     statusEl.style.borderColor = 'rgba(255, 60, 60, 0.3)';
     statusEl.style.color = '#ff3c3c';
+  }
+}
+
+async function updateHiveMemoryLearningWidget() {
+  const memoryEl = document.getElementById('hiveMemoryStatus');
+  const learningEl = document.getElementById('hiveLearningStatus');
+  if (!memoryEl && !learningEl) return;
+
+  try {
+    const [memoryRes, learningRes] = await Promise.all([
+      fetch('/api/neurocore/memory'),
+      fetch('/api/neurocore/learning')
+    ]);
+    const memoryData = await memoryRes.json();
+    const learningData = await learningRes.json();
+
+    if (memoryEl) {
+      const recentCount = Array.isArray(memoryData.recent) ? memoryData.recent.length : 0;
+      const failedCount = typeof memoryData.failedCount === 'number' ? memoryData.failedCount : 0;
+      memoryEl.textContent = `Memory: ${recentCount} recent · ${failedCount} failed`;
+      memoryEl.style.display = 'inline-flex';
+      memoryEl.style.background = memoryData.connected ? 'rgba(0, 255, 136, 0.12)' : 'rgba(255, 187, 0, 0.12)';
+      memoryEl.style.borderColor = memoryData.connected ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255, 187, 0, 0.3)';
+      memoryEl.style.color = memoryData.connected ? '#00ff88' : '#ffbb00';
+    }
+
+    if (learningEl) {
+      const stats = Array.isArray(learningData.providerStats) ? learningData.providerStats : [];
+      const top = stats.slice(0, 2).map(s => `${s.provider}:${(s.successRate * 100).toFixed(0)}%`).join(' · ') || 'no data';
+      learningEl.textContent = `Learning: ${top}`;
+      learningEl.style.display = 'inline-flex';
+      learningEl.style.background = learningData.connected ? 'rgba(0, 240, 255, 0.12)' : 'rgba(255, 187, 0, 0.12)';
+      learningEl.style.borderColor = learningData.connected ? 'rgba(0, 240, 255, 0.3)' : 'rgba(255, 187, 0, 0.3)';
+      learningEl.style.color = learningData.connected ? '#00f0ff' : '#ffbb00';
+    }
+  } catch (err) {
+    if (memoryEl) {
+      memoryEl.textContent = 'Memory: error';
+      memoryEl.style.display = 'inline-flex';
+      memoryEl.style.background = 'rgba(255, 60, 60, 0.12)';
+      memoryEl.style.borderColor = 'rgba(255, 60, 60, 0.3)';
+      memoryEl.style.color = '#ff3c3c';
+    }
+    if (learningEl) {
+      learningEl.textContent = 'Learning: error';
+      learningEl.style.display = 'inline-flex';
+      learningEl.style.background = 'rgba(255, 60, 60, 0.12)';
+      learningEl.style.borderColor = 'rgba(255, 60, 60, 0.3)';
+      learningEl.style.color = '#ff3c3c';
+    }
   }
 }
 
