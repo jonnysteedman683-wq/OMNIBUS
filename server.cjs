@@ -3285,6 +3285,24 @@ app.get('/api/neurocore/health', async (req, res) => {
   }
 });
 
+app.get('/api/neurocore/status', async (req, res) => {
+  try {
+    const connected = !!(swarmAdapter && systemState.neurocoreConnected);
+    res.json({
+      success: true,
+      connected,
+      neurocoreAvailable: await neurocoreBridge.isAvailable(),
+      hermesAvailable: systemState.hermesAvailable,
+      lastHealthCheck: systemState.lastHealthCheck,
+      lastProvider: systemState.lastProvider || null,
+      peers: systemState.peers || [],
+      queueSize: systemState.queueSize || 0
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/neurocore/debate', async (req, res) => {
   if (!swarmAdapter) {
     return res.status(503).json({ error: 'Swarm adapter not connected.' });
