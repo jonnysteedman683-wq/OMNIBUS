@@ -3260,6 +3260,7 @@ app.post('/api/neurocore/intent', async (req, res) => {
       phase: typeof phase === 'number' ? phase : null
     };
     
+    const startTime = Date.now();
     const result = await swarmAdapter.start(intentObj);
     systemState.lastIntent = intentObj.intent;
     systemState.lastProvider = intentObj.source || 'hermes';
@@ -3274,6 +3275,34 @@ app.post('/api/neurocore/intent', async (req, res) => {
         timestamp: Date.now()
       }
     ];
+    const latencyMs = result ? Date.now() - startTime : null;
+    const memoryStore = typeof neurocoreBridge.getMemoryStore === 'function' ? neurocoreBridge.getMemoryStore() : null;
+    const learningLogger = typeof neurocoreBridge.getLearningLogger === 'function' ? neurocoreBridge.getLearningLogger() : null;
+    if (memoryStore) {
+      memoryStore.add({
+        id: intentObj.id,
+        intent: intentObj.intent,
+        source: intentObj.source,
+        confidence: intentObj.confidence,
+        phase: intentObj.phase,
+        requiresConfirmation: intentObj.requiresConfirmation,
+        status: result?.status === 'pending_confirmation' ? 'pending_confirmation' : (result?.status === 'failed' ? 'failed' : 'completed'),
+        provider: intentObj.source || null,
+        latencyMs,
+        success: result?.status !== 'failed',
+        timestamp: Date.now()
+      });
+    }
+    if (learningLogger && latencyMs !== null) {
+      learningLogger.log({
+        confidence: intentObj.confidence,
+        success: result?.status !== 'failed',
+        provider: intentObj.source || 'hermes',
+        latencyMs,
+        intentHash: `${intentObj.source}:${intentObj.intent}`,
+        timestamp: Date.now()
+      });
+    }
     res.json({
       success: true,
       phase: intentObj.phase,
@@ -3364,6 +3393,49 @@ app.get('/api/neurocore/phase-groups', async (req, res) => {
       success: true,
       connected,
       summary
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/neurocore/memory', async (req, res) => {
+  try {
+    const memoryStore = typeof neurocoreBridge.getMemoryStore === 'function' ? neurocoreBridge.getMemoryStore() : null;
+    if (!memoryStore) {
+      return res.json({ success: true, connected: false, reason: 'memory_store_unavailable', records: [] });
+    }
+    const recent = memoryStore.recent(50);
+    const failed = memoryStore.failed();
+    res.json({
+      success: true,
+      connected: !!(swarmAdapter && systemState.neurocoreConnected),
+      recent,
+      failedCount: failed.length,
+      failed: failed.slice(-10)
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/neurocore/learning', async (req, res) => {
+  try {
+    const learningLogger = typeof neurocoreBridge.getLearningLogger === 'function' ? neurocoreBridge.getLearningLogger() : null;
+    if (!learningLogger) {
+      return res.json({ success: true, connected: false, reason: 'learning_logger_unavailable', samples: [] });
+    }
+    const recent = learningLogger.recent(100);
+    const providerStats = ['hermes','ollama','nous']
+      .map(p => learningLogger.providerStats(p))
+      .filter(Boolean);
+    const suggestion = learningLogger.thresholdSuggestion();
+    res.json({
+      success: true,
+      connected: !!(swarmAdapter && systemState.neurocoreConnected),
+      recentSamples: recent,
+      providerStats,
+      thresholdSuggestion: suggestion
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
