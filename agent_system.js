@@ -828,6 +828,13 @@ module.exports = { ArchitectureSpec, executeTaskPipeline };`
   // ─── Hive Swarm Mind — Unified Dispatch via Neurocore ─────────────────
   async dispatch(task) {
     const config = window.apiConfig || { provider: 'hermes', model: 'hermes3' };
+    const taskText = task.description || task;
+    const phase = ((() => {
+      const str = `${config.provider}:${taskText}`;
+      let h = 0;
+      for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+      return ((h % 8) + 8) % 8;
+    })());
     
     this.logEvent(`🐝 Dispatching task through Hive Swarm Mind...`, 'info');
     this.broadcast();
@@ -837,11 +844,12 @@ module.exports = { ArchitectureSpec, executeTaskPipeline };`
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          intent: task.description || task,
+          intent: taskText,
           source: config.provider,
           confidence: task.confidence || 0.5,
           features: task.features || {},
-          requiresConfirmation: task.requiresConfirmation || false
+          requiresConfirmation: task.requiresConfirmation || false,
+          phase
         })
       });
       

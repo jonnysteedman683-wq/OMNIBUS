@@ -4,6 +4,15 @@
 // Hive Swarm Mind — global API config
 window.apiConfig = window.apiConfig || { provider: 'hermes', model: 'hermes3' };
 
+function hashIntentPhase(intent, source = 'hermes') {
+  const str = `${source}:${intent}`;
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h * 31 + str.charCodeAt(i)) | 0;
+  }
+  return ((h % 8) + 8) % 8;
+}
+
 // Initialize Neurocore connection on load
 async function initHiveSwarmMind() {
   try {

@@ -20,6 +20,11 @@ let systemState = {
   hermesAvailable: false,
   lastHealthCheck: 0,
   peers: [],
+  lastProvider: null,
+  lastIntent: null,
+  lastActionResult: null,
+  recentIntents: [],
+  queueSize: 0
 };
 
 const app = express();
@@ -3241,7 +3246,7 @@ app.post('/api/neurocore/intent', async (req, res) => {
     return res.status(503).json({ error: 'Swarm adapter not connected. Call /api/neurocore/connect first.' });
   }
   
-  const { intent, source, confidence, features, requiresConfirmation } = req.body;
+  const { intent, source, confidence, features, requiresConfirmation, phase } = req.body;
   
   try {
     const intentObj = {
@@ -3251,11 +3256,29 @@ app.post('/api/neurocore/intent', async (req, res) => {
       confidence: confidence || 0.5,
       features: features || {},
       timestamp: Date.now(),
-      requiresConfirmation: requiresConfirmation || false
+      requiresConfirmation: requiresConfirmation || false,
+      phase: typeof phase === 'number' ? phase : null
     };
     
     const result = await swarmAdapter.start(intentObj);
-    res.json({ success: true, ...result });
+    systemState.lastIntent = intentObj.intent;
+    systemState.lastProvider = intentObj.source || 'hermes';
+    systemState.lastActionResult = result || null;
+    systemState.recentIntents = [
+      ...(systemState.recentIntents || []).slice(-49),
+      {
+        intent: intentObj.intent,
+        phase: intentObj.phase,
+        source: intentObj.source,
+        confidence: intentObj.confidence,
+        timestamp: Date.now()
+      }
+    ];
+    res.json({
+      success: true,
+      phase: intentObj.phase,
+      ...result
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -3314,6 +3337,33 @@ app.get('/api/neurocore/queue', async (req, res) => {
       lastIntent: systemState.lastIntent || null,
       lastActionResult: systemState.lastActionResult || null,
       recent: (systemState.recentIntents || []).slice(-20)
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/neurocore/phase-groups', async (req, res) => {
+  try {
+    const connected = !!(swarmAdapter && systemState.neurocoreConnected);
+    const recent = (systemState.recentIntents || []).slice(-20);
+    const groups = new Map();
+    for (const item of recent) {
+      const key = item.phase ?? 'none';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
+    }
+    const summary = {};
+    for (const [key, items] of groups) {
+      summary[key] = {
+        count: items.length,
+        intents: items.map(i => i.intent).filter(Boolean).slice(-5)
+      };
+    }
+    res.json({
+      success: true,
+      connected,
+      summary
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
