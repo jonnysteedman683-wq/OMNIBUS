@@ -477,7 +477,61 @@ class AgentSystem {
     }
     if (typeof window !== 'undefined' && window.SwarmRuntime) {
       this.swarmEngine = new window.SwarmRuntime.SwarmRuntimeEngine();
+      this.registerDefaultSwarmWorkflow();
     }
+  }
+
+  registerDefaultSwarmWorkflow() {
+    if (!this.swarmEngine || !this.swarmEngine.createGraph) return;
+
+    const orchestrator = this.agents.find(a => a.id === 'orchestrator');
+    const mlExpert = this.agents.find(a => a.id === 'ml-expert');
+    const architect = this.agents.find(a => a.id === 'architect');
+    const coder = this.agents.find(a => a.id === 'coder');
+    const qaAgent = this.agents.find(a => a.id === 'qa-agent');
+
+    const graph = this.swarmEngine.createGraph('agent-task-workflow', [
+      {
+        id: 'orchestrator-decompose',
+        action: { type: 'task_decompose', target: 'orchestrator', reasoning: 'Decompose task and define execution graph' },
+        loop: null
+      },
+      {
+        id: 'ml-expert-analyze',
+        action: { type: 'ml_analysis', target: 'ml-expert', reasoning: 'Run ML meta-learning and algorithm routing' },
+        loop: { type: 'for', count: 3, step: (i, total, ctx) => ctx?.log?.(`ML pass ${i + 1}/${total}`) }
+      },
+      {
+        id: 'architect-plan',
+        action: { type: 'architecture_plan', target: 'architect', reasoning: 'Design architecture and knowledge graph' },
+        loop: null
+      },
+      {
+        id: 'coder-implement',
+        action: { type: 'implementation', target: 'coder', reasoning: 'Implement files and refactor code paths' },
+        loop: { type: 'repeat', count: 2, step: (i, total) => this.logEvent(`Coder pass ${i + 1}/${total}`, 'info') }
+      },
+      {
+        id: 'qa-verify',
+        action: { type: 'verification', target: 'qa-agent', reasoning: 'Run tests and verify runtime behavior' },
+        loop: null
+      }
+    ], [
+      { from: 'orchestrator-decompose', to: 'ml-expert-analyze' },
+      { from: 'orchestrator-decompose', to: 'architect-plan' },
+      { from: 'ml-expert-analyze', to: 'coder-implement' },
+      { from: 'architect-plan', to: 'coder-implement' },
+      { from: 'coder-implement', to: 'qa-verify' }
+    ]);
+
+    this.swarmGraph = graph;
+  }
+
+  async runSwarmWorkflow(name = 'agent-task-workflow', context = {}) {
+    if (!this.swarmEngine || !this.swarmEngine.runWorkflow) {
+      return { status: 'failed', error: 'Swarm workflow engine not available' };
+    }
+    return this.swarmEngine.runWorkflow(name, context);
   }
 
   // ─── Multi-Path Task Execution ─────────────────────────────────────

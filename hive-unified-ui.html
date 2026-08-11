@@ -152,15 +152,18 @@
       flex-wrap: wrap;
     }
     .btn {
-      padding: 8px 12px;
-      border-radius: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.06);
+      background: linear-gradient(135deg, rgba(0,240,255,0.12), rgba(255,0,234,0.12));
       color: #fff;
       cursor: pointer;
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      transition: all .2s ease;
     }
-    .btn:hover { border-color: var(--accent); box-shadow: 0 0 10px rgba(0,240,255,0.25); }
+    .btn:hover { border-color: var(--accent); box-shadow: 0 0 14px rgba(0,240,255,0.35); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -187,16 +190,16 @@
       <nav class="tabs" id="tabBar">
         <button class="tab active" data-panel="panel-chat">Chat</button>
         <button class="tab" data-panel="panel-status">Status</button>
+        <button class="tab" data-panel="panel-telemetry">Telemetry</button>
         <button class="tab" data-panel="panel-phase">Phase Groups</button>
         <button class="tab" data-panel="panel-memory">Memory</button>
         <button class="tab" data-panel="panel-learning">Learning</button>
         <button class="tab" data-panel="panel-tools">Tools</button>
-        <button class="tab" data-panel="panel-brainstorm">ML Brainstorm</button>
-        <button class="tab" data-panel="panel-arise">ARISE</button>
       </nav>
       <div class="toolbar">
         <span id="globalStatus" class="pill">disconnected</span>
         <button id="connectBtn" class="btn">Connect Neurocore</button>
+        <button id="emergencyStopBtn" class="btn" style="border-color: var(--danger); color: var(--danger);">Emergency Stop</button>
       </div>
     </header>
 
@@ -221,6 +224,44 @@
           <div class="card"><div class="title"><i class="fas fa-shield-alt"></i> Hermes</div><div id="statusHermes" class="meta">—</div></div>
         </div>
         <button id="refreshStatusBtn" class="btn">Refresh</button>
+      </article>
+
+      <article class="panel" id="panel-telemetry">
+        <h2>Telemetry Dashboard</h2>
+        <div class="grid-2">
+          <div class="card"><div class="title"><i class="fas fa-history"></i> Total Intents</div><div id="teleTotalIntents" class="meta">—</div></div>
+          <div class="card"><div class="title"><i class="fas fa-hourglass-half"></i> Avg Latency</div><div id="teleLatency" class="meta">—</div></div>
+          <div class="card"><div class="title"><i class="fas fa-exclamation-circle"></i> Errors</div><div id="teleErrors" class="meta">—</div></div>
+          <div class="card"><div class="title"><i class="fas fa-clock"></i> Uptime</div><div id="teleUptime" class="meta">—</div></div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 12px 0;">
+          <div class="card" style="background: rgba(0,240,255,0.08); border-color: rgba(0,240,255,0.3);">
+            <div class="title" style="color: var(--accent);">🧠 Hermes</div>
+            <div id="telHermesCount" class="meta">—</div>
+            <div id="telHermesRate" class="meta" style="font-size:0.75rem;">—</div>
+          </div>
+          <div class="card" style="background: rgba(255,187,0,0.08); border-color: rgba(255,187,0,0.3);">
+            <div class="title" style="color: var(--warn);">🐝 Ollama</div>
+            <div id="telOllamaCount" class="meta">—</div>
+            <div id="telOllamaRate" class="meta" style="font-size:0.75rem;">—</div>
+          </div>
+          <div class="card" style="background: rgba(255,60,60,0.08); border-color: rgba(255,60,60,0.3);">
+            <div class="title" style="color: var(--danger);">🎯 Nous</div>
+            <div id="telNousCount" class="meta">—</div>
+            <div id="telNousRate" class="meta" style="font-size:0.75rem;">—</div>
+          </div>
+          <div class="card" style="background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.3);">
+            <div class="title" style="color: var(--success);">📊 High Conf</div>
+            <div id="telHighConf" class="meta">—</div>
+          </div>
+        </div>
+        <div style="overflow:auto; max-height: 300px;">
+          <table>
+            <thead><tr><th>id</th><th>intent</th><th>provider</th><th>conf</th><th>status</th><th>latency</th><th>ts</th></tr></thead>
+            <tbody id="telemetryTableBody"><tr><td colspan="7" class="empty">No telemetry yet.</td></tr></tbody>
+          </table>
+        </div>
+        <button id="refreshTelemetryBtn" class="btn">Refresh</button>
       </article>
 
       <article class="panel" id="panel-phase">
@@ -281,22 +322,6 @@
         </div>
         <pre id="brainstormOutput" class="meta mono" style="white-space: pre-wrap;">—</pre>
       </article>
-
-      <article class="panel" id="panel-arise">
-        <h2>ARISE</h2>
-        <div class="meta">Swarm simulation control and status.</div>
-        <div class="grid-2">
-          <div class="card"><div class="title">Status</div><div id="ariseStatus" class="meta">—</div></div>
-          <div class="card"><div class="title">Controls</div>
-            <div class="toolbar">
-              <button id="ariseStartBtn" class="btn">Start</button>
-              <button id="arisePauseBtn" class="btn">Pause</button>
-              <button id="ariseInspectBtn" class="btn">Inspect</button>
-            </div>
-          </div>
-        </div>
-        <pre id="ariseOutput" class="meta mono" style="white-space: pre-wrap;">—</pre>
-      </article>
     </section>
   </div>
 
@@ -315,7 +340,6 @@
         switchTab(btn.dataset.panel);
       });
 
-      // Global connect helper
       window.connectNeurocore = async function(){
         const res = await fetch('/api/neurocore/connect', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ baseUrl:'http://localhost:8080/v1', enableHermes:true })});
         const data = await res.json();
@@ -332,20 +356,31 @@
       };
       document.getElementById('connectBtn').addEventListener('click', window.connectNeurocore);
 
-      // Status refresh
-      async function refreshStatus(){
-        const res = await fetch('/api/neurocore/status');
+      document.getElementById('emergencyStopBtn').addEventListener('click', async ()=>{
+        const res = await fetch('/api/neurocore/emergency-stop', { method:'POST' });
         const data = await res.json();
-        document.getElementById('statusHealth').textContent = data.success ? (data.connected ? 'healthy' : 'disconnected') : 'error';
-        document.getElementById('statusPeers').textContent = `${data.peers?.length || 0} peers`;
-        document.getElementById('statusLastIntent').textContent = data.lastIntent || '—';
-        document.getElementById('statusLastProvider').textContent = data.lastProvider || '—';
-        document.getElementById('statusQueue').textContent = `${data.queueSize ?? 0}`;
-        document.getElementById('statusHermes').textContent = data.hermesAvailable ? 'available' : 'unavailable';
+        const el = document.getElementById('globalStatus');
+        el.textContent = data.success && data.stopped ? 'stopped' : 'error';
+        el.classList.add('danger');
+        el.classList.remove('success','warn');
+      });
+
+      async function refreshStatus(){
+        try {
+          const res = await fetch('/api/neurocore/status');
+          const data = await res.json();
+          document.getElementById('statusHealth').textContent = data.success ? (data.connected ? 'healthy' : 'disconnected') : 'error';
+          document.getElementById('statusPeers').textContent = `${data.peers?.length || 0} peers`;
+          document.getElementById('statusLastIntent').textContent = data.lastIntent || '—';
+          document.getElementById('statusLastProvider').textContent = data.lastProvider || '—';
+          document.getElementById('statusQueue').textContent = `${data.queueSize ?? 0}`;
+          document.getElementById('statusHermes').textContent = data.hermesAvailable ? 'available' : 'unavailable';
+        } catch (e) {
+          document.getElementById('statusHealth').textContent = 'error';
+        }
       }
       document.getElementById('refreshStatusBtn').addEventListener('click', refreshStatus);
 
-      // Phase refresh
       async function refreshPhase(){
         const res = await fetch('/api/neurocore/phase-groups');
         const data = await res.json();
@@ -353,7 +388,6 @@
       }
       document.getElementById('refreshPhaseBtn').addEventListener('click', refreshPhase);
 
-      // Memory refresh
       async function refreshMemory(){
         const res = await fetch('/api/neurocore/memory');
         const data = await res.json();
@@ -371,7 +405,6 @@
       }
       document.getElementById('refreshMemoryBtn').addEventListener('click', refreshMemory);
 
-      // Learning refresh
       async function refreshLearning(){
         const res = await fetch('/api/neurocore/learning');
         const data = await res.json();
@@ -387,7 +420,6 @@
       }
       document.getElementById('refreshLearningBtn').addEventListener('click', refreshLearning);
 
-      // Tools
       document.getElementById('loadToolsBtn').addEventListener('click', async ()=>{
         const res = await fetch('/api/neurocore/tools');
         const data = await res.json();
@@ -395,41 +427,55 @@
         sel.innerHTML = '<option value="">Select tool</option>' + (data.tools || []).map(t => `<option value="${t.name}">${t.name}</option>`).join('');
         document.getElementById('toolsOutput').textContent = JSON.stringify(data, null, 2);
       });
+
       document.getElementById('runToolBtn').addEventListener('click', async ()=>{
         const tool = document.getElementById('toolSelect').value;
-        const body = tool ? { tool, arguments: { message: 'hello from unified hive ui' } } : { tool:'echo', arguments:{ message:'hello from unified hive ui' } };
+        const body = tool ? { tool, arguments: { message: 'hello from unified hive ui' } } : { tool:'noop', arguments:{ message:'hello from unified hive ui' } };
         const res = await fetch('/api/neurocore/tools/call', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
         const data = await res.json();
         document.getElementById('toolsOutput').textContent = JSON.stringify(data, null, 2);
       });
 
-      // Brainstorm
-      document.getElementById('runBrainstormBtn').addEventListener('click', async ()=>{
-        document.getElementById('brainstormOutput').textContent = 'Synthesizing...';
-        await new Promise(r => setTimeout(r, 300));
-        document.getElementById('brainstormOutput').textContent = JSON.stringify({ synthesis: 'v75.0 Zenith-inspired sparse mixture', modules: ['Flow-Matching ToT','Titans TTT','Sub-Bit Router'] }, null, 2);
-      });
-      document.getElementById('sendBrainstormToChatBtn').addEventListener('click', ()=>{
-        const text = document.getElementById('brainstormOutput').textContent;
-        const input = document.getElementById('chatInputField');
-        if (input) { input.value = 'Brainstorm result: ' + text; }
-        switchTab('panel-chat');
-      });
+      async function refreshTelemetry(){
+        try {
+          const res = await fetch('/api/telemetry/summary');
+          const data = await res.json();
+          document.getElementById('teleTotalIntents').textContent = data.totalIntents ?? '—';
+          document.getElementById('teleLatency').textContent = data.latency?.avg != null ? `${data.latency.avg} ms` : '—';
+          document.getElementById('teleErrors').textContent = data.errorCount != null ? String(data.errorCount) : '—';
+          document.getElementById('teleUptime').textContent = data.uptimeMs != null ? `${Math.floor(data.uptimeMs / 1000)}s` : '—';
+          
+          // Provider cards
+          const hermes = data.providerPerformance?.hermes;
+          const ollama = data.providerPerformance?.ollama;
+          const nous = data.providerPerformance?.nous;
+          document.getElementById('telHermesCount').textContent = hermes?.count ?? '0';
+          document.getElementById('telHermesRate').textContent = hermes?.successRate ? `${hermes.successRate}% SR` : '—';
+          document.getElementById('telOllamaCount').textContent = ollama?.count ?? '0';
+          document.getElementById('telOllamaRate').textContent = ollama?.successRate ? `${ollama.successRate}% SR` : '—';
+          document.getElementById('telNousCount').textContent = nous?.count ?? '0';
+          document.getElementById('telNousRate').textContent = nous?.successRate ? `${nous.successRate}% SR` : '—';
+          document.getElementById('telHighConf').textContent = data.confidenceDistribution?.high ?? '0';
+          
+          const intentRes = await fetch('/api/telemetry/intents?limit=50');
+          const intentData = await intentRes.json();
+          const tbody = document.getElementById('telemetryTableBody');
+          const rows = (intentData.intents || []).map(r => `<tr>
+            <td class="mono" style="font-size:0.75rem;">${r.id.slice(-8)}</td>
+            <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis;">${r.intent.slice(0, 25)}</td>
+            <td>${r.provider || ''}</td>
+            <td>${(r.confidence ?? 0).toFixed(2)}</td>
+            <td><span class="pill ${r.status === 'completed' ? 'success' : r.status === 'pending_confirmation' ? 'warn' : 'danger'}">${r.status}</span></td>
+            <td class="mono">${r.latencyMs ?? '—'}</td>
+            <td class="mono" style="font-size:0.75rem;">${new Date(r.timestamp).toLocaleTimeString().slice(0, 8)}</td>
+          </tr>`).join('');
+          tbody.innerHTML = rows || '<tr><td colspan="7" class="empty">No telemetry yet.</td></tr>';
+        } catch (e) {
+          document.getElementById('teleTotalIntents').textContent = 'error';
+        }
+      }
+      document.getElementById('refreshTelemetryBtn').addEventListener('click', refreshTelemetry);
 
-      // ARISE
-      document.getElementById('ariseStartBtn').addEventListener('click', async ()=>{
-        document.getElementById('ariseOutput').textContent = 'Starting ARISE...';
-        await new Promise(r => setTimeout(r, 200));
-        document.getElementById('ariseOutput').textContent = JSON.stringify({ status:'started', speed:1.0, agents:40 }, null, 2);
-      });
-      document.getElementById('arisePauseBtn').addEventListener('click', async ()=>{
-        document.getElementById('ariseOutput').textContent = 'Paused.';
-      });
-      document.getElementById('ariseInspectBtn').addEventListener('click', async ()=>{
-        document.getElementById('ariseOutput').textContent = JSON.stringify({ selected:null, visible:true, fps:60 }, null, 2);
-      });
-
-      // Initial status
       refreshStatus();
     })();
   </script>

@@ -1,6 +1,6 @@
 {
   "name": "omnibus-backend",
-  "version": "7.0.0",
+  "version": "85.0.0",
   "description": "Node.js backend for OMNIBUS Frontier Supreme Edition",
   "main": "server.cjs",
   "scripts": {
